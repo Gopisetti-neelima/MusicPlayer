@@ -1,0 +1,30 @@
+//Artist Table
+
+create table `artist`(
+    `artistId` int(11) PRIMARY KEY,
+    `artistName` varchar(100),
+    `joinYear` year
+);
+
+//Albums Table
+
+create table `album`(
+    `albumId` int(11) PRIMARY KEY,
+    `albumName` varchar(255),
+    `albumYear` year,
+    `artistId` int(11),
+    `totalSongs` int(3),
+    foreign key(`artistId`) REFERENCES `artist`(`artistId`)
+);
+
+//Songs Table
+
+create table `song`(
+	`songId` int(11) PRIMARY KEY,
+    `trackNo` int(5),
+    `songName` varchar(50),
+    `albumId` int(11),
+    `artistList` varchar(50),
+    FOREIGN KEY (`albumId`) REFERENCES `album`(`albumId`)
+);
+

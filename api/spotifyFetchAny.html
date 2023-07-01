@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>SPOTIFY</title>
+	<style type="text/css">
+		table,td{
+			border: 1px solid #000;
+		}
+		table{
+			border-collapse: collapse;
+		}
+	</style>
+</head>
+<body>
+	<select id="type" name="type">
+		<option value="top" name="type">Top</option>
+		<option value="all" name="type">All</option>
+	</select>
+	<br>
+	<label>Enter Artist Name</label>
+	<input id="artist" type="text" name="artist" placeholder="enter artist name"><button id="submit1">Submit</button><br>
+	<label>Enter Album Name</label>
+	<input id="album" type="text" name="album" placeholder="enter album name"><button id="submit2">Submit</button><br>
+	<label>Enter Song Name</label>
+	<input id="track" type="text" name="track" placeholder="enter track name"><button id="submit3">Submit</button><br>
+	<table id="target"></table>
+	<div id="test"></div>
+	<script type="text/javascript">
+		token = "BQBlGiTN6PN0uSBZkJi7MKriugq2MNAtLSJSr1R3CVAhw5FJVjKvVqA8bzd5veegg193tu1RugNlQgtnyHs6dqgrGUvJqEV7tKJmGt3NLfva9a4rkRoN9cbFsr8NwrRggtBtAvtI933xrb7uOAZupR9wdFSwCKlHzjp12QBFaxLgCwWXIMjvXGzFyActQIY";
+
+		function displayArtistData(data){
+			max = 0;
+			temp = [];
+			for(i=0;i<data["artists"]["items"].length;i++)
+			{
+				n = data["artists"]["items"][i]["followers"]["total"];
+				if(n > max){
+					max = n;
+					temp = data["artists"]["items"][i];
+				}
+			}
+			if(temp==[])
+				alert("No results");
+			else{
+				data = temp;
+				name = data["name"];
+				followers = data["followers"]["total"];
+				genres = data["genres"];
+				imageSrc = data["images"][0]["url"];
+				string = "<tr><td>"+name+"</td><td>"+followers+"</td><td>"+genres+"</td><td><img src='"+imageSrc+"' width='200px'></td><tr>";
+				document.getElementById("target").innerHTML = string;
+			}
+		}
+
+		function displayAlbumData(temp, artist){
+			for(i=0;i<temp["albums"]["items"].length;i++)
+			{
+				data = temp["albums"]["items"][i];
+				name = data["name"];
+				date = data["release_date"];
+				n = data["total_tracks"];
+				imageSrc = data["images"][0]["url"];
+				string = "<tr><td>"+name+"</td><td>"+date+"</td><td>"+n+"</td><td><img src='"+imageSrc+"' width='200px'></td><tr>";
+				document.getElementById("target").innerHTML += string;
+			}
+		}
+
+		function displayTrackResults(temp){
+			// max = 0;
+			// temp = [];
+			// for(i=0;i<data["tracks"]["items"].length;i++)
+			// {
+			// 	n = data["tracks"]["items"][i]["popularity"];
+			// 	if(n > max){
+			// 		max = n;
+			// 		temp = data["tracks"]["items"][i];
+			// 	}
+			// }
+			// if(temp==[])
+			// 	alert("No results");
+			// else{
+			// 	data = temp;
+			// 	songName = data["name"];
+			// 	albumName = data["album"]["name"];
+			// 	albumArtist = data["album"]["artists"][0]["name"];
+			// 	songArtists = data["artists"][0]["name"];
+			// 	popularity = data["popularity"];
+			// 	genres = data["genres"];
+			// 	imageSrc = data["album"]["images"][0]["url"];
+			// 	string = "<tr><td>"+name+"</td><td>"+popularity+"</td><td>"+genres+"</td><td><img src='"+imageSrc+"' width='200px'></td><tr>";
+			// 	document.getElementById("target").innerHTML = string;
+			// }
+			document.getElementById("target").innerHTML = "";
+			for(i=0;i<temp["tracks"]["items"].length;i++)
+			{
+				data = temp["tracks"]["items"][i];
+				songName = data["name"];
+				albumName = data["album"]["name"];
+				albumArtist = data["album"]["artists"][0]["name"];
+				songArtists = data["artists"][0]["name"];
+				popularity = data["popularity"];
+				imageSrc = data["album"]["images"][0]["url"];
+				string = "<tr><td>"+songName+"</td><td>"+popularity+"</td><td>"+albumArtist+"</td><td>"+songArtists+"</td><td>"+albumName+"</td><td><img src='"+imageSrc+"' width='200px'></td><tr>";
+				document.getElementById("target").innerHTML += string;
+			}
+
+		}
+
+		function getArtistData(key,type){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			    	displayArtistData(JSON.parse(xhttp.responseText));
+			       // document.getElementById("test").innerHTML = xhttp.responseText;
+			    }
+			};
+			xhttp.open("GET","https://api.spotify.com/v1/search?q="+key+"&type=artist", true);
+			xhttp.setRequestHeader("Accept", "application/json");
+			xhttp.setRequestHeader("Content-Type","application/json");
+			xhttp.setRequestHeader("Authorization","Bearer "+token);
+			xhttp.send();
+		}
+
+		function getAlbumData(key,type){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			       displayAlbumData(JSON.parse(xhttp.responseText));
+			       
+			    }
+			};
+			xhttp.open("GET","https://api.spotify.com/v1/search?q="+key+"&type=album", true);
+			xhttp.setRequestHeader("Accept", "application/json");
+			xhttp.setRequestHeader("Content-Type","application/json");
+			xhttp.setRequestHeader("Authorization","Bearer "+token);
+			xhttp.send();
+		}
+
+		function getTrackData(key,type){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			       displayTrackResults(JSON.parse(xhttp.responseText));
+			       // document.getElementById("test").innerHTML = xhttp.responseText;
+			    }
+			};
+			xhttp.open("GET","https://api.spotify.com/v1/search?q="+key+"&type=track", true);
+			xhttp.setRequestHeader("Accept", "application/json");
+			xhttp.setRequestHeader("Content-Type","application/json");
+			xhttp.setRequestHeader("Authorization","Bearer "+token);
+			xhttp.send();
+		}
+
+		inputField1 = document.getElementById("artist");
+		document.getElementById("submit1").addEventListener('click',function(){
+			if(inputField1.value!=""){
+				key = inputField1.value;
+				type = document.getElementById("type").value;
+				getArtistData(key,type);
+			}
+			else{
+				alert("Null value");
+			}
+		});
+
+		inputField2 = document.getElementById("album");
+		document.getElementById("submit2").addEventListener('click',function(){
+			if(inputField2.value!=""){
+				key = inputField2.value;
+				type = document.getElementById("type").value;
+				getAlbumData(key,type);
+			}
+			else{
+				alert("Null value");
+			}
+		});
+
+		inputField3 = document.getElementById("track");
+		document.getElementById("submit3").addEventListener('click',function(){
+			if(inputField3.value!=""){
+				key = inputField3.value;
+				type = document.getElementById("type").value;
+				getTrackData(key,type);
+			}
+			else{
+				alert("Null value");
+			}
+		});
+	</script>
+</body>
+</html>

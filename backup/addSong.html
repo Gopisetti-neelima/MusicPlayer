@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Add Song</title>
+</head>
+<body>
+	<form action="addSong.php" method="post" enctype="multipart/form-data">
+		<table>
+			<tr>
+				<td><label for="name">Song Name</label></td>
+				<td><input type="text" name="name"></td>
+			</tr>
+			<tr>
+				<td><label for="artist">Artist Name</label></td>
+				<td><select id="artist" name="artist">
+						<option></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td><label for="atype">Album Type</label></td>
+				<td><select id="atype" name="atype">
+						<option value="new">New</option>
+						<option value="old">Existing</option>
+					</select>
+				</td>
+			</tr>
+			<tr id="aTarget">
+				<td><label for='album'>Album Name</label></td>
+				<td><input id='album' name='album'></td>
+			</tr>
+			<tr id="photoTr">
+				<td><label>Album thumbnail (square)</label></td>
+				<td><input type="file" name="thumbnail"></td>
+			</tr>
+			<tr>
+				<td><label>Song File (only mp3)</label></td>
+				<td><input type="file" name="song"></td>
+			</tr>
+		</table>
+		<input type="submit" name="submit" value="Add">
+	</form>
+</body>
+
+<script type="text/javascript">
+	function artist(){
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	    	AlbumInfo = JSON.parse(xhttp.responseText);
+	    	var x = document.getElementById("artist");
+	      	for (var i = AlbumInfo.length - 1; i >= 0; i--) {
+	      		id = AlbumInfo[i]["artistId"];
+	      		name = AlbumInfo[i]["artistName"];
+	      		var option = document.createElement("option");
+				option.text = name;
+				option.value = id;
+				x.add(option);
+	      	}
+	    }
+		};
+		xhttp.open("GET", 'allArtistList.php', true);
+		xhttp.send();
+	}
+
+	function album(){
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	    	AlbumInfo = JSON.parse(xhttp.responseText);
+	    	var x = document.getElementById("album");
+	      	for (var i = AlbumInfo.length - 1; i >= 0; i--) {
+	      		id = AlbumInfo[i]["albumId"];
+	      		name = AlbumInfo[i]["albumName"];
+	      		var option = document.createElement("option");
+				option.text = name;
+				option.value = id;
+				x.add(option);
+	      	}
+	    }
+		};
+		xhttp.open("GET", 'allAlbumList.php', true);
+		xhttp.send();
+	}
+
+	
+	artist();
+	
+	atype = document.getElementById("atype");
+	atype.addEventListener('change', function(){
+		target = document.getElementById("aTarget");
+		photo = document.getElementById("photoTr");
+		if(atype.value=="new")
+		{
+			ans = "<td><label for='album'>Album Name</label></td><td><input id='album' name='album'></td>";
+			target.innerHTML = ans;
+			photo.display = "block";
+		}
+		else{
+			ans = "<td><label for='artist'>Select Album</label></td><td><select id='album' name='album'><option></option></select></td>";
+			target.innerHTML = ans;
+			photo.display = "none";
+			album();
+		}
+	});
+</script>
+</html>

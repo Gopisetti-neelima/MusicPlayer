@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>SPOTIFY</title>
+	<style type="text/css">
+		table,td{
+			border: 1px solid #000;
+		}
+		table{
+			border-collapse: collapse;
+		}
+	</style>
+</head>
+<body>
+	<div id="ts"></div>
+	<button id="fire">PUSH BUTTON</button>
+	<table id="target"></table>
+	<div id="test"></div>
+	<div id="json"></div>
+	<script type="text/javascript">
+		token = "BQDPmpMhux4ZJgJK7KOeq5hZy9RzmmtdiZvA31TpA8jRr77NmfoQ3o8gkl5D0jEcqSv1yoBGrvsn-fU6wZWJJjAOakpgCQKq6uY0RitvUYW_vp9ySib6YvuLzJGAIzxmqiI_Qonikgbprz5Ltbnj_5hzQiZhebEZ0A76zaFQwb2jFM3duajxu9jtwPklyIQ";
+
+		function addArtistData(counter,name,pop,genre,imgUrl){
+			var xhttp = new XMLHttpRequest();
+			request = "add.php?type=artist&name="+name+"&pop="+pop+"&genre="+genre+"&imgUrl="+imgUrl;
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			    	status = xhttp.responseText;
+			    	if(status=="Success"){
+			    		string = "<tr><td>"+counter+"</td><td>"+name+"</td><td>"+pop+"</td><td>"+genres+"</td><td>Success</td><td></td><tr>";
+			    	}
+			    	else if(status=="Already exists"){
+			    		string = "<tr><td>"+counter+"</td><td>"+name+"</td><td>"+pop+"</td><td>"+genres+"</td><td>Already Exists</td><td></td><tr>";
+			    	}
+			    	else{
+			    		string = "<tr><td>"+counter+"</td><td>"+name+"</td><td>"+pop+"</td><td>"+genres+"</td><td>Failure</td><td>"+request+"</td><tr>";
+			    	}
+			    	document.getElementById("target").innerHTML = string + document.getElementById("target").innerHTML;
+			    }
+			};
+			xhttp.open("GET",request, true);
+			xhttp.send();
+		}
+
+		function retriveArtistData(counter,temp){
+			for(i=0;i<temp["artists"].length;i++)
+			{
+				data = temp["artists"][i];
+				name = data["name"];
+				pop = data["popularity"];
+				genres = data["genres"].join(',');
+				if(data["images"].length>0)
+					imageSrc = data["images"][0]["url"];
+				else
+					imageSrc = 'img/default.jpg';
+				addArtistData(counter,name,pop,genres,imageSrc);
+			}
+		}
+
+		function getArtistData(counter,id_list){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			    	// document.getElementById("json").innerHTML = xhttp.responseText;
+			    	retriveArtistData(counter,JSON.parse(xhttp.responseText));
+			    }
+			};
+			xhttp.open("GET","https://api.spotify.com/v1/artists?ids="+id_list, true);
+			xhttp.setRequestHeader("Accept", "application/json");
+			xhttp.setRequestHeader("Content-Type","application/json");
+			xhttp.setRequestHeader("Authorization","Bearer "+token);
+			xhttp.send();
+		}
+
+		artists_list = [];
+		function getArtistListJson(){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			    	list = JSON.parse(xhttp.responseText);
+			    	for(i=0;i<list["artist"].length;i++){
+			    		artists_list.push(list["artist"][i]); 
+			    	}
+			    	document.getElementById('ts').innerHTML = i;
+			    }
+			};
+			xhttp.open("GET","sendJson.php?file=artists", true);
+			xhttp.send();
+		}
+		getArtistListJson();
+
+		counter = 0;
+		pb = document.getElementById("fire");
+		pb.addEventListener('click',()=>{
+			arrSlice = artists_list.slice(counter, counter+50);
+			id_arr = [];
+			for(i=0;i<arrSlice.length;i++){
+				id_arr.push(arrSlice[i]["id"]);
+			}
+			id_list = id_arr.join(',');
+			getArtistData(counter+1,id_list);
+			counter+=50;
+		});
+
+	</script>
+</body>
+</html>

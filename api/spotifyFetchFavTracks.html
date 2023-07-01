@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>SHAZAM</title>
+	<style type="text/css">
+		table{
+			border: 1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<table id="target"></table>
+	<div id="test"></div>
+	<script type="text/javascript">
+		counter = 1;
+		function displayTrackResults(temp){
+			for(i=0;i<temp["items"].length;i++)
+			{
+				data = temp["items"][i];
+				timeAdded = data["added_at"];
+				songName = data["track"]["name"];
+				albumName = data["track"]["album"]["name"];
+				albumArtist = data["track"]["album"]["artists"][0]["name"];
+				songArtists = data["track"]["artists"][0]["name"];
+				popularity = data["track"]["popularity"];
+				imageSrc = data["track"]["album"]["images"][0]["url"];
+				string = "<tr><td>"+counter+"</td><td>"+timeAdded+"</td><td>"+songName+"</td><td>"+popularity+"</td><td>"+albumArtist+"</td><td>"+songArtists+"</td><td>"+albumName+"</td><td><img src='"+imageSrc+"' width='200px'></td><tr>";
+				document.getElementById("target").innerHTML += "<br>"+counter+","+albumArtist+","+songArtists;
+				counter+=1;
+				// document.getElementById("target").innerHTML += string;
+			}
+
+		}
+		total = 0;
+		function getFavoritesList(offset){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			       displayTrackResults(JSON.parse(xhttp.responseText));
+			       document.getElementById("test").innerHTML += xhttp.responseText;
+			    }
+			};
+			xhttp.open("GET","https://api.spotify.com/v1/me/tracks?limit=50&offset="+offset, true);
+			xhttp.setRequestHeader("Accept", "application/json");
+			xhttp.setRequestHeader("Content-Type","application/json");
+			xhttp.setRequestHeader("Authorization","Bearer BQBL974smwyPtVf0ic6S_UnKSVJkyV944jSTzMK9OQi41fYzwWxZiwOM6yg0KCmcSUioVvSPlUCXlgU9R93Z00AM6lFTEjyoWiJOl_UrWTnD0ScOSGifw2esbktWFuJk6FwIE3Qv4V_zAYqxvjyJYjufN_YLzhcvdog5T90TL_-Kw-iekPgavgBvPVRo6Lg");
+			xhttp.send();
+		}
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+		       displayTrackResults(JSON.parse(xhttp.responseText));
+		       total = JSON.parse(xhttp.responseText)["total"];
+		       offset = 0;
+		       alert(total);
+		       while(total>0){
+		       		offset += 50;
+		       		total -= 50;
+		       		getFavoritesList(offset);
+		       }
+		       document.getElementById("test").innerHTML += xhttp.responseText;
+		    }
+		};
+		xhttp.open("GET","https://api.spotify.com/v1/me/tracks?limit=50&offset=0", true);
+		xhttp.setRequestHeader("Accept", "application/json");
+		xhttp.setRequestHeader("Content-Type","application/json");
+		xhttp.setRequestHeader("Authorization","Bearer BQBL974smwyPtVf0ic6S_UnKSVJkyV944jSTzMK9OQi41fYzwWxZiwOM6yg0KCmcSUioVvSPlUCXlgU9R93Z00AM6lFTEjyoWiJOl_UrWTnD0ScOSGifw2esbktWFuJk6FwIE3Qv4V_zAYqxvjyJYjufN_YLzhcvdog5T90TL_-Kw-iekPgavgBvPVRo6Lg");
+		xhttp.send();
+	</script>
+</body>
+</html>
